@@ -1,0 +1,6 @@
+{
+  "name": "Alfamart Tanjung Bungin - Phantom Inventory Engine",
+  "description": "Deterministic Retail Data Execution & Sidak Target System for Alfamart Tanjung Bungin node",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
