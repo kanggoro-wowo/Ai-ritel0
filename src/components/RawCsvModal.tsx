@@ -14,9 +14,11 @@ import {
   AlertCircle,
   RefreshCw,
   Table,
+  ShieldCheck,
 } from "lucide-react";
 import { RawSkuData } from "../types";
 import { parseCsvInputAsync, skusToCsv, sanitizeNumber } from "../utils/phantomEngine";
+import { parseUniversalFile, parseUniversalText } from "../utils/fileParser";
 import { INITIAL_RAW_CSV } from "../data/initialData";
 
 interface RawCsvModalProps {
@@ -55,44 +57,31 @@ export const RawCsvModal: React.FC<RawCsvModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Handle Automatic CSV Parsing from File
+  // Handle Automatic Parsing from Universal File (.xlsx, .xls, .csv, .tsv)
   const handleFile = async (file: File) => {
     if (!file) return;
 
     setIsLoading(true);
     setStatusMsg(`Membaca file "${file.name}"...`);
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const content = e.target?.result as string;
-      if (content) {
-        try {
-          const parsed = await parseCsvInputAsync(content);
-          if (parsed.length > 0) {
-            setDataset(parsed);
-            const csvStr = skusToCsv(parsed);
-            setRawTextEdit(csvStr);
-            // Automatic update into parent app state (No copy-paste or manual submit needed!)
-            onUpdateCsv(csvStr);
-            setStatusMsg(`✅ Berhasil! ${parsed.length} SKU otomatis terurai & dievaluasi dari "${file.name}".`);
-          } else {
-            setStatusMsg("❌ File CSV kosong atau format tidak sesuai.");
-          }
-        } catch (err) {
-          console.error(err);
-          setStatusMsg("❌ Gagal menguraikan file CSV.");
-        } finally {
-          setIsLoading(false);
-        }
+    try {
+      const parsed = await parseUniversalFile(file);
+      if (parsed.length > 0) {
+        setDataset(parsed);
+        const csvStr = skusToCsv(parsed);
+        setRawTextEdit(csvStr);
+        // Automatic update into parent app state (No copy-paste or manual submit needed!)
+        onUpdateCsv(csvStr);
+        setStatusMsg(`✅ Berhasil! ${parsed.length} SKU otomatis terurai & dievaluasi dari "${file.name}".`);
+      } else {
+        setStatusMsg("❌ File kosong atau format data tidak dapat dikenali.");
       }
-    };
-
-    reader.onerror = () => {
-      setStatusMsg("❌ Gagal membaca file.");
+    } catch (err) {
+      console.error(err);
+      setStatusMsg("❌ Gagal menguraikan file. Pastikan format .xlsx, .csv, atau .tsv valid.");
+    } finally {
       setIsLoading(false);
-    };
-
-    reader.readAsText(file);
+    }
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,7 +273,7 @@ export const RawCsvModal: React.FC<RawCsvModalProps> = ({
             <input
               type="file"
               ref={fileInputRef}
-              accept=".csv"
+              accept=".csv, .tsv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
               onChange={handleFileInputChange}
               className="hidden"
             />
@@ -295,7 +284,7 @@ export const RawCsvModal: React.FC<RawCsvModalProps> = ({
 
             <div className="space-y-1">
               <p className="text-sm font-bold text-slate-100">
-                Tarik &amp; Lepaskan File <span className="text-amber-400">.CSV</span> di sini, atau klik tombol di bawah
+                Tarik &amp; Lepaskan File <span className="text-amber-400">.XLSX, .CSV, atau .TSV</span> di sini, atau klik tombol di bawah
               </p>
               <p className="text-xs text-slate-400 font-mono">
                 Format: PLU, Nama_SKU, Avg_Sales_7Hari, Sales_Kemarin, Sales_Dua_Hari_Lalu, Stok_Sistem_OnHand, Harga_Satuan, Status_DC
@@ -308,14 +297,20 @@ export const RawCsvModal: React.FC<RawCsvModalProps> = ({
             >
               {isLoading ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" /> Menguraikan File CSV...
+                  <RefreshCw className="w-4 h-4 animate-spin" /> Menguraikan File...
                 </>
               ) : (
                 <>
-                  <FileSpreadsheet className="w-4 h-4" /> Pilih File CSV Audit
+                  <FileSpreadsheet className="w-4 h-4" /> Pilih File Data Audit (.XLSX / .CSV / .TSV)
                 </>
               )}
             </button>
+
+            {/* UI TRUST BADGE */}
+            <div className="flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-3.5 py-1.5 rounded-full border border-emerald-800/80 shadow-sm mt-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              100% Local Processing. Supports Excel (.xlsx), CSV, and TSV.
+            </div>
           </div>
 
           {/* Interactive Mode Toolbar & Search */}
@@ -570,14 +565,27 @@ export const RawCsvModal: React.FC<RawCsvModalProps> = ({
               )}
             </div>
           ) : (
-            /* Raw Text Area View */
+            /* Raw Text Area View - Smart Universal Parsing (CSV, TSV, Google Sheets Paste) */
             <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                <span>Tempel / Ketik Teks Raw (Mendukung Tab-Separated Google Sheets / Excel / CSV):</span>
+                <span className="text-[11px] text-amber-400">Pasti terurai otomatis (Comma / Tab)</span>
+              </div>
               <textarea
                 value={rawTextEdit}
                 onChange={(e) => {
-                  setRawTextEdit(e.target.value);
-                  onUpdateCsv(e.target.value);
+                  const val = e.target.value;
+                  setRawTextEdit(val);
+                  const parsed = parseUniversalText(val);
+                  if (parsed.length > 0) {
+                    setDataset(parsed);
+                    const newCsv = skusToCsv(parsed);
+                    onUpdateCsv(newCsv);
+                  } else {
+                    onUpdateCsv(val);
+                  }
                 }}
+                placeholder="Paste data dari Google Sheets / Excel / CSV / TSV di sini..."
                 rows={14}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-300 focus:outline-none focus:border-amber-500"
               />

@@ -15,6 +15,7 @@ import {
   parseCsvInputAsync,
 } from "./utils/phantomEngine";
 import { SidakTargetSku, RawSkuData } from "./types";
+import { parseUniversalText } from "./utils/fileParser";
 import { CheckCircle, ShieldCheck, FileSpreadsheet, Lock, RefreshCw } from "lucide-react";
 
 export default function App() {
@@ -188,23 +189,23 @@ export default function App() {
     }
   };
 
-  // CSV Update (Async & Persistent)
+  // CSV / Universal Data Update (Async & Persistent)
   const handleUpdateCsv = async (newCsv: string) => {
     setRawCsvText(newCsv);
     localStorage.setItem("saved_csv_raw", newCsv);
     setIsParsing(true);
     try {
-      const parsed = await parseCsvInputAsync(newCsv);
+      const parsed = parseUniversalText(newCsv);
       if (parsed.length > 0) {
         setRawSkus(parsed);
         setZeroedSkuIds(new Set()); // Reset zeroed statuses for new dataset
         localStorage.setItem("audited_sku_ids", JSON.stringify([]));
         showToast(`Dataset baru dimuat: ${parsed.length} SKU terurai.`);
       } else {
-        showToast("Format CSV tidak valid atau kosong.");
+        showToast("Format CSV/Data tidak valid atau kosong.");
       }
     } catch (err) {
-      console.error("Error parsing CSV:", err);
+      console.error("Error parsing CSV/Data:", err);
       showToast("Gagal menguraikan data CSV.");
     } finally {
       setIsParsing(false);
