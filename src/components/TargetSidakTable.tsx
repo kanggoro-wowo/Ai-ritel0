@@ -6,11 +6,13 @@ import { Search, CheckCircle, RefreshCw, AlertCircle, ArrowUpDown, ChevronDown, 
 interface TargetSidakTableProps {
   survivingSkus: SidakTargetSku[];
   onExecuteZeroStock: (skuId: string) => void;
+  onUndoZeroStock: (skuId: string) => void;
 }
 
 export const TargetSidakTable: React.FC<TargetSidakTableProps> = ({
   survivingSkus,
   onExecuteZeroStock,
+  onUndoZeroStock,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedSku, setExpandedSku] = useState<string | null>(null);
@@ -180,28 +182,27 @@ export const TargetSidakTable: React.FC<TargetSidakTableProps> = ({
                       </td>
 
                       <td className="py-3 px-3 text-center">
-                        <button
-                          id={`btn-zero-stock-${pluKey}`}
-                          onClick={() => onExecuteZeroStock(pluKey)}
-                          disabled={isZeroed}
-                          className={`px-2.5 py-1 text-[11px] font-bold rounded-md transition-all flex items-center justify-center gap-1 mx-auto ${
-                            isZeroed
-                              ? "bg-emerald-950 border border-emerald-700 text-emerald-400 cursor-default opacity-90"
-                              : "bg-red-600 hover:bg-red-500 text-white shadow-sm hover:shadow-red-900/40 cursor-pointer"
-                          }`}
-                        >
-                          {isZeroed ? (
-                            <>
-                              <CheckCircle className="w-3 h-3 text-emerald-400" />
-                              Stok System 0
-                            </>
-                          ) : (
-                            <>
-                              <AlertCircle className="w-3 h-3" />
-                              Sidak & Nolkan Stok
-                            </>
-                          )}
-                        </button>
+                        {isZeroed ? (
+                          <div className="flex flex-col items-center gap-1.5">
+                            <span className="px-2.5 py-1 text-[11px] font-bold rounded-md bg-emerald-950 border border-emerald-700 text-emerald-400 cursor-default flex items-center justify-center gap-1 mx-auto">
+                              <CheckCircle className="w-3 h-3 text-emerald-400" /> Stok 0
+                            </span>
+                            <button
+                              onClick={() => onUndoZeroStock(pluKey)}
+                              className="text-[10px] font-mono text-slate-400 hover:text-amber-400 underline decoration-slate-600 hover:decoration-amber-400 transition-colors cursor-pointer"
+                            >
+                              [Batal/Undo]
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            id={`btn-zero-stock-${pluKey}`}
+                            onClick={() => onExecuteZeroStock(pluKey)}
+                            className="px-2.5 py-1 text-[11px] font-bold rounded-md transition-all flex items-center justify-center gap-1 mx-auto bg-red-600 hover:bg-red-500 text-white shadow-sm hover:shadow-red-900/40 cursor-pointer"
+                          >
+                            <AlertCircle className="w-3 h-3" /> Sidak &amp; Nolkan
+                          </button>
+                        )}
                       </td>
                     </tr>
 

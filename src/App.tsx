@@ -189,6 +189,16 @@ export default function App() {
     }
   };
 
+  // Fungsi Pembatalan Eksekusi (Rollback)
+  const handleUndoZeroStock = (skuId: string) => {
+    setZeroedSkuIds((prev) => {
+      const next = new Set(prev);
+      next.delete(skuId); // Mencabut SKU dari status 'NOL'
+      return next;
+    });
+    showToast("Eksekusi sidak dibatalkan. Stok SKU dikembalikan ke sistem.");
+  };
+
   // CSV / Universal Data Update (Async & Persistent)
   const handleUpdateCsv = async (newCsv: string) => {
     setRawCsvText(newCsv);
@@ -293,6 +303,7 @@ export default function App() {
         <TargetSidakTable
           survivingSkus={survivingSkus}
           onExecuteZeroStock={handleExecuteZeroStock}
+          onUndoZeroStock={handleUndoZeroStock}
         />
 
         {/* Dropped SKUs - Failure Reasons Accordion */}
