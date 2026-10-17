@@ -8,7 +8,7 @@ dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json());
 
@@ -58,7 +58,7 @@ Mohon berikan laporan taktis singkat:
 3. Instruksi Auto-Replenishment (Prosedur Eksekusi Nolkan Stok di POS/ERP)`;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash-lite",
+        model: "gemini-3.1-flash-lite",
         contents: prompt,
         config: {
           systemInstruction,
