@@ -36,9 +36,9 @@ async function startServer() {
       // Privacy Guard: Heavily strip any payload to strictly 3 numeric variables: sku_id, stok_sistem, avg_sales
       const sanitizedSkus = Array.isArray(filteredSkus)
         ? filteredSkus.map((s: any) => ({
-            sku_id: String(s.sku_id || ""),
-            stok_sistem: Number(s.stok_sistem || 0),
-            avg_sales: Number(s.avg_sales || s.avg_sales_harian || 0),
+            sku_id: String(s.plu || s.sku_id || ""),
+            stok_sistem: Number(s.stok_sistem_onhand ?? s.stok_sistem ?? 0),
+            avg_sales: Number(s.avg_sales_7hari ?? s.avg_sales_harian ?? 0),
           }))
         : [];
 

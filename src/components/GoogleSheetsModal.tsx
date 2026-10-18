@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X, FileSpreadsheet, Check, ExternalLink, Save } from "lucide-react";
+import { X, FileSpreadsheet, Check, Save } from "lucide-react";
 
 interface GoogleSheetsModalProps {
   isOpen: boolean;
@@ -29,8 +29,6 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
-
-  const scriptDocUrl = "https://docs.google.com/document/d/1HLFwoHlZdculXEiLHUXmeAFEtrxTDzUf980DVSa9XoI/edit?usp=sharing";
 
   return (
     <div
@@ -87,29 +85,6 @@ export const GoogleSheetsModal: React.FC<GoogleSheetsModalProps> = ({
             </p>
           </div>
         </form>
-
-        {/* 1 Link to the GitHub Gist / Google Docs containing the updated script */}
-        <div className="border-t border-slate-800 pt-4">
-          <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold text-slate-200">
-                Dokumentasi &amp; Script Google Apps Script
-              </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Salin dan deploy script versi terbaru dari Google Docs / GitHub Gist resmi.
-              </p>
-            </div>
-            <a
-              href={scriptDocUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-emerald-300 text-xs font-bold rounded-lg border border-slate-700 flex items-center gap-1.5 transition-colors shrink-0"
-            >
-              <span>Buka Script</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
 
         <div className="flex justify-end pt-2 border-t border-slate-800">
           <button
